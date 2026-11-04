@@ -1,5 +1,39 @@
 # 🦅 JEEKA · Motor TUKAWIRU
 
+## JEEKA v0.4 · Mejora visual y cartografía dual
+
+Se incorporó un diseño de mayor contraste y legibilidad sobre la identidad JEEKA Charizard, y se sustituyeron los pequeños gráficos rasterizados por recursos vectoriales escalables SVG. Los originales permanecen en el repositorio como material de referencia.
+
+### Dos modos de mapa
+
+**1. Mapa integrado en el dashboard** (`index.html#mapa`):
+- Barra de acciones con botón **⤢ Abrir mapa completo**, que abre otra pestaña conservando estación de origen, sitio seleccionado, variable e instante temporal.
+- Botón **Mostrar/Ocultar minimapa**, desplegado por defecto. El minimapa representa los mismos cuatro sitios con pines mucho más pequeños; clic sobre un pin centra la ubicación en el mapa principal.
+- La selección de CECOSABI, UNISON, Metrocentro o Jardín Juárez actualiza la ficha, el marcador y el enlace al mapa completo.
+
+**2. Mapa independiente** (`mapa.html`):
+- Interfaz adaptada a un mapa mucho más grande, con botón de pantalla completa, selección de sitio, variable de interés, controles temporales, cuatro indicadores y un panel lateral de interpretación.
+- Abre el histórico de la misma estación desde IndexedDB si se ha importado en **ese mismo navegador y origen**. De lo contrario recurre a la demo original.
+- Puede reaccionar a cambios de selección del dashboard abierto, mediante BroadcastChannel, cuando el navegador lo permita.
+- Botón de retorno al visor principal.
+
+**Precaución permanente:** Los cuatro lugares son puntos de referencia aproximados, no ubicaciones instrumentales confirmadas. Se replica **un solo histórico** del sensor en todos ellos, de forma expresamente simulada. Sin monitoreo en vivo, AQI oficial, ni concentraciones por barrio. No se crean filas adicionales por lugar en IndexedDB.
+
+### Recursos
+
+- `assets/jeeka-eagle-vector.svg`: águila estilizada escalable inspirada en la identidad original, usada para evitar pixelación de miniaturas grandes.
+- `assets/jeeka-pin.svg`: pin escalable, usado en mapa normal, minimapa y mapa completo.
+- `assets/jeeka-miniatura.svg`: marca horizontal vectorial.
+- `css/jeeka-v04.css`: hoja de estilo de alto contraste aplicada después de estilos anteriores.
+- `js/jeeka-demo-data.js`: **única fuente** compartida de los 74 minutos iniciales y las cuatro posiciones.
+- `js/jeeka-mini-main.js`: componente de minimapa y apertura de ventana.
+- `js/jeeka-fullmap.js`: interfaz y lógica de `mapa.html`.
+- `js/jeeka-import.js`: importador original preservado.
+
+Pruebas recomendadas: abrir cada modo, seleccionar los cuatro pines, ocultar y volver a mostrar minimapa, arrastrar la barra temporal, cambiar CO₂/temperatura/humedad/MQ135, importar CSV, refrescar y abrir mapa completo en la misma sesión.
+
+
+
 **Jefatura Estratégica de Evaluación Ecológica y Kalidad del Aire**
 
 > Vigilar el aire. Anticipar el riesgo.

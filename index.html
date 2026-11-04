@@ -7,7 +7,6 @@
 <meta name="description" content="JEEKA 0.4 · Monitoreo territorial e importación de datos SCD40/MQ135 con historial local.">
 <link rel="preconnect" href="https://unpkg.com"><link rel="preconnect" href="https://cdn.jsdelivr.net">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-<link rel="stylesheet" href="./css/jeeka-v04.css">
 <script defer src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
 <script defer src="./js/jeeka-demo-data.js"></script>
@@ -110,7 +109,9 @@ nav{border-bottom:1px solid #29636a;padding:0 0 18px}
 @media(max-width:800px){.hero-art{opacity:.4;width:46%}.hero-copy{max-width:92%}.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.map{height:365px}}
 @media(max-width:520px){.hero{padding:16px 14px}.hero-eagle{width:150px;height:150px;right:0}.hero-art{opacity:.23;width:55%}.kpi-ribbon{font-size:10px}.topnav a{font-size:11px;padding:8px}.jeeka-map-pin{transform:scale(.8)}.map-bubble{font-size:10px}.map{height:370px}}
 
-</style></head><body><div class="wrap">
+</style>
+<link rel="stylesheet" href="./css/jeeka-v04.css">
+</head><body><div class="wrap">
 <nav><div class="brand"><div class="emblem" aria-label="Águila original JEEKA"><img class="brand-eagle" src="./assets/jeeka-eagle-vector.svg" alt="Águila JEEKA con paisaje sonorense" onerror="this.style.display='none'"><span class="brand-fallback" aria-hidden="true">🦅</span></div><div><div class="brandname">JEEKA</div><div class="brandsub">MOTOR TUKAWIRU · V0.4</div></div></div><div class="topnav"><a href="#inicio">⌂ Inicio</a><a href="#monitor">◫ Monitor</a><a href="#mapa">⌖ Mapa</a><a href="#ingestPanel">⇧ Importar</a><a href="#historial">▤ Historial</a></div>
 <div class="navside"><span class="pill"><span class="dot"></span><span id="sourceLabel">Demo histórico · CSV 04 NOV 2026</span></span><a class="outline" href="#ingestPanel">⬆ Centro de importación</a><label class="filebutton">Seleccionar CSV / JSON<input type="file" id="file" accept=".csv,.json,text/csv,application/json"></label><button class="outline" id="download">↓ Exportar ventana</button></div></nav>
 <section class="hero" id="inicio"><div class="hero-copy"><div class="eyebrow">Visor geoespacial de vigilancia ambiental · JEEKA</div><h1>Vigilar el aire. <span style="color:var(--orange)">Anticipar el riesgo.</span></h1><p>Red piloto de cuatro ubicaciones en Hermosillo, con el <strong>mismo histórico copiado con fines demostrativos</strong>. Exploración de CO₂, temperatura, humedad y señal MQ135, sin calcular un índice oficial de contaminación.</p></div><div class="hero-art" aria-hidden="true"><div class="hero-sun"></div><img src="./assets/jeeka-eagle-vector.svg" alt="" class="hero-eagle"><div class="hero-dune"></div><div class="hero-wave"></div></div><div class="hero-note"><strong id="stamp">04 nov 2026 · 12:25</strong><br><span id="sampleCount">849 muestras válidas · 5 marcas SinRed</span><br>Datos en memoria del navegador, sin servidor</div></section>

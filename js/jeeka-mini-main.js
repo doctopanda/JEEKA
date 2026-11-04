@@ -73,6 +73,7 @@ function setup(){
  // Actualiza el enlace al variar la fecha/estación desde el importador y tras confirmar un lote.
  const source=$("sourceLabel");
  if(source&&window.MutationObserver)new MutationObserver(updateLink).observe(source,{childList:true,characterData:true,subtree:true});
+ const siteLabel=$("stationTitle");if(siteLabel&&window.MutationObserver)new MutationObserver(updateLink).observe(siteLabel,{childList:true,characterData:true,subtree:true});
  updateLink();
  if("BroadcastChannel" in window)try{sync=new BroadcastChannel("jeeka-map-sync-v1");updateLink();}catch(_){}
  window.addEventListener("resize",()=>{if(miniature&&visible)setTimeout(()=>miniature.invalidateSize(),100);});

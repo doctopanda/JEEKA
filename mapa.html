@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="es"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#06343b">
+<title>JEEKA · Mapa completo | Motor TUKAWIRU</title>
+<meta name="description" content="Mapa demostrativo ampliado de JEEKA, cuatro puntos de referencia en Hermosillo con una única serie histórica replicada.">
+<link rel="icon" type="image/svg+xml" href="./assets/jeeka-eagle-vector.svg">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<link rel="stylesheet" href="./css/jeeka-v04.css">
+<script defer src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script defer src="./js/jeeka-demo-data.js"></script>
+<script defer src="./js/jeeka-import.js"></script>
+<script defer src="./js/jeeka-fullmap.js"></script>
+<style>
+*{box-sizing:border-box}
+.fullmap-page{margin:0;min-height:100vh;background:radial-gradient(ellipse at 80% -15%,#1767728a,transparent 43%),#062d35;color:#fff4df;font-family:Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,Arial,sans-serif;font-size:14px}
+.full-shell{height:100vh;min-height:650px;display:flex;flex-direction:column;padding:13px 16px 16px;gap:12px;max-width:2200px;margin:0 auto}
+.full-header{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:18px;border:1px solid #3a8086;background:#08383fee;border-radius:19px;padding:11px 15px;box-shadow:0 8px 22px #00222c33}
+.full-brand{display:flex;align-items:center;gap:12px;min-width:0}
+.full-brand img{height:59px;width:59px;object-fit:contain;border-radius:12px;background:#0b4e53;border:1px solid #a4a86f}
+.full-brand h1{font-weight:900;font-size:24px;letter-spacing:.12em;color:#FFEEB0;margin:0;line-height:1.2}
+.full-brand p{font-size:10px;letter-spacing:.14em;color:#FAAA6D;font-weight:800;margin:3px 0 0}
+.full-header-actions{display:flex;flex-wrap:wrap;gap:9px;align-items:center}
+.full-header-actions a,.full-header-actions button{background:#0d4650;border:1px solid #5b8d92;border-radius:11px;color:#fff4df;padding:10px 13px;text-decoration:none;font:inherit;font-size:12px;font-weight:800;cursor:pointer}
+.full-header-actions a:first-child{background:#FAAA6D;color:#082d34;border-color:#FAAA6D}
+.full-header-actions button:hover,.full-header-actions a:hover{filter:brightness(1.14)}
+.full-banner{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 16px;border:1px solid #d69a59;background:#503c24a0;border-radius:13px;font-size:12px;line-height:1.4}
+.full-banner strong{color:#FFE2B8;font-weight:900;letter-spacing:.03em}
+.full-banner span{color:#f8dfbf}
+.full-work{display:grid;grid-template-columns:minmax(0,1fr) 313px;flex:1;min-height:0;gap:13px}
+.full-map-card{background:#073640;border:1px solid #37808a;border-radius:19px;display:flex;flex-direction:column;overflow:hidden;min-width:0;min-height:0}
+.full-map-top{padding:11px 15px;border-bottom:1px solid #296772;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px}
+.full-map-top h2{font-size:18px;margin:0;color:#fff0d4}
+.full-map-top .note{font-size:11px;color:#c5dad9;margin-top:4px}
+.full-select{background:#104650;border:1px solid #5c8a90;color:#fff3db;padding:9px 10px;border-radius:11px;font:inherit;font-size:12px;min-width:135px}
+.full-site-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;padding:10px 14px;border-bottom:1px solid #2a646d}
+.full-site-chip{background:#0d454e;border:1px solid #4e8188;border-radius:10px;color:#f6eee0;padding:8px 10px;font:inherit;font-size:12px;font-weight:800;cursor:pointer}
+.full-site-chip.active{background:#FAAA6D;border-color:#FFEEB0;color:#073039}
+.full-site-chip small{font-size:9px;margin-left:5px;color:inherit;opacity:.8}
+.full-map-area{position:relative;flex:1;min-height:360px;padding:10px 11px}
+#fullMap{height:100%;width:100%;border:1px solid #729a98;border-radius:13px;background:#cee0d8}
+.fullmap-page .jeeka-map-pin{height:60px;width:43px}
+.fullmap-page .jeeka-map-pin img{height:60px;width:43px}
+.fullmap-page .map-bubble{left:-16px;top:-34px}
+.fullmap-page .leaflet-tile{filter:none!important}
+.full-map-legend{position:absolute;top:23px;left:25px;z-index:450;padding:10px 12px;border:1px solid #f0c28e;border-radius:11px;background:#083640f0;box-shadow:0 5px 18px #00283660;pointer-events:none;font-size:11px;line-height:1.6;color:#fff0d4}
+.full-map-legend strong{display:block;color:#ffe7b6}
+.full-side{background:linear-gradient(150deg,#0c3d46,#082c36);border:1px solid #347982;border-radius:19px;overflow:auto;min-width:0;padding:20px 18px}
+.full-side .site-label{font-size:10px;letter-spacing:.12em;color:#FAAA6D;font-weight:900}
+.full-side h2{font-size:25px;margin:7px 0 5px;color:#FFEEB0}
+.full-side .location{font-size:12px;line-height:1.55;color:#c8dfd6;margin:0 0 13px}
+.full-side .kind{color:#ffc493;font-weight:800;font-size:11px;margin:0 0 10px}
+.full-measure{background:#06303a;border:1px solid #4c8991;border-radius:16px;padding:17px;margin-bottom:13px}
+.full-measure .measure-label{font-size:11px;color:#d9eae5;font-weight:800;text-transform:uppercase;letter-spacing:.06em}
+.full-measure .measure-value{font-size:42px;font-weight:900;letter-spacing:-.05em;line-height:1.08;color:#fff5dc;margin:10px 0 5px}
+.full-measure .measure-value small{font-size:14px;letter-spacing:0;color:#bbdad3}
+.full-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.full-grid .tile{border:1px solid #386e79;background:#082b35;border-radius:12px;padding:12px 11px}
+.full-grid .tile small{font-size:10px;color:#bddbd4;display:block}
+.full-grid .tile strong{font-size:19px;display:block;margin-top:8px;color:#fff1da}
+.full-warning{font-size:11px;line-height:1.55;background:#563b217d;border:1px solid #b98754;padding:12px;border-radius:12px;margin-top:14px;color:#ffe6c2}
+.full-lower{padding:12px 14px 14px;border-top:1px solid #30636d;background:#082f39}
+.full-lower-line{display:flex;justify-content:space-between;gap:15px;flex-wrap:wrap;align-items:center;margin-bottom:9px;font-size:11px}
+.full-lower-line strong{color:#fff0d4}
+.full-lower-line span{color:#c5ddd5}
+#fullSlider{width:100%;accent-color:#FAAA6D;cursor:pointer}
+.full-times{display:flex;justify-content:space-between;gap:8px;font-size:10px;color:#c2dfdb;margin-top:3px}
+.full-time{color:#ffd8a7!important}
+.full-footer{font-size:10px;color:#bdd5cf;text-align:center;margin:0}
+.full-map-area:fullscreen{background:#073540;padding:16px}
+.full-map-area:fullscreen #fullMap{height:100%;width:100%}
+@media(max-width:1000px){.full-shell{height:auto;min-height:100vh}.full-work{grid-template-columns:1fr}.full-map-area{height:68vh;min-height:430px;flex:auto}.full-side{overflow:visible}.full-map-card{min-height:650px}.full-banner{display:block}.full-banner span{display:block;margin-top:3px}}
+@media(max-width:620px){.full-shell{padding:8px;gap:8px}.full-header{padding:10px}.full-brand img{width:49px;height:49px}.full-brand h1{font-size:21px}.full-site-chip{font-size:11px;padding:7px}.full-map-top{padding:11px}.full-map-top h2{font-size:16px}.full-map-area{min-height:365px;height:56vh}.full-map-legend{top:19px;left:18px;padding:7px 9px;font-size:10px}.full-side{padding:15px}.full-measure .measure-value{font-size:36px}.full-times{font-size:9px}}
+</style>
+</head><body class="fullmap-page">
+<div class="full-shell">
+<header class="full-header"><div class="full-brand"><img src="./assets/jeeka-eagle-vector.svg" alt="Águila del sistema JEEKA"><div><h1>JEEKA</h1><p>MOTOR TUKAWIRU · MAPA COMPLETO</p></div></div>
+<div class="full-header-actions"><a href="./index.html#mapa">← Volver al visor</a><button id="fitAll" type="button">⌗ Ver los cuatro sitios</button><button id="fullScreen" type="button">⛶ Pantalla completa</button></div></header>
+<div class="full-banner"><strong>⚠ DEMOSTRACIÓN GEOGRÁFICA: CUATRO UBICACIONES, UNA MISMA SERIE HISTÓRICA.</strong><span>Los valores no se obtuvieron de sensores instalados en estos puntos y no representan contaminación ambiental local.</span></div>
+<main class="full-work">
+<section class="full-map-card" aria-labelledby="mapTitle">
+<div class="full-map-top"><div><h2 id="mapTitle">Mapa piloto de Hermosillo</h2><div class="note" id="sourceType">CSV histórico original replicado en cuatro marcadores</div></div>
+<label for="fullMetric" style="font-size:11px;color:#d9eee5">Variable <select id="fullMetric" class="full-select"><option value="co2">CO₂ (SCD40)</option><option value="temp">Temperatura</option><option value="hum">Humedad relativa</option><option value="gas">Señal MQ135</option></select></label></div>
+<div class="full-site-row" aria-label="Estaciones ilustrativas"><button data-site="CECOSABI" class="full-site-chip" type="button">CECOSABI <small>DEMO</small></button><button data-site="UNISON" class="full-site-chip" type="button">UNISON <small>DEMO</small></button><button data-site="METROCENTRO" class="full-site-chip" type="button">Metrocentro <small>DEMO</small></button><button data-site="JARDIN_JUAREZ" class="full-site-chip" type="button">Jardín Juárez <small>DEMO</small></button></div>
+<div class="full-map-area" id="mapFrame"><div id="fullMap" role="application" aria-label="Mapa de cuatro ubicaciones demostrativas en Hermosillo"></div>
+<div class="full-map-legend"><strong>🦅 RED JEEKA · SIMULADA</strong>4 puntos de referencia · 1 serie de datos<br>Mapa OpenStreetMap · Sin interpolación</div></div>
+<div class="full-lower"><div class="full-lower-line"><strong>Explorador temporal</strong><span><span id="fullTimestamp" class="full-time">2026-11-04 12:25</span> · <span id="fullCount">74 minutos</span></span></div>
+<input type="range" id="fullSlider" min="0" max="73" value="73" step="1" aria-label="Explorar instante de la serie histórica">
+<div class="full-times"><span id="fullRangeStart">11-04 11:12</span><span id="fullRangeEnd">11-04 12:25</span></div></div>
+</section>
+<aside class="full-side" aria-live="polite"><div class="site-label">FICHA DEL PUNTO SELECCIONADO · DEMO</div><h2 id="fullTitle">CECOSABI</h2><p id="siteType" class="kind">Centro coordinador · SIMULADO</p><p id="siteAddress" class="location">Ubicación de referencia · no verificada</p>
+<div class="full-measure"><div class="measure-label" id="metricName">CO₂</div><div class="measure-value"><span id="fullValue">1,055</span> <small id="fullUnit">ppm</small></div><div style="font-size:10px;color:#fdcb9a">Una lectura histórica replicada, no un índice de calidad del aire</div></div>
+<div class="full-grid"><div class="tile"><small>CO₂ · SCD40</small><strong id="fullCo2">1,055 ppm</strong></div><div class="tile"><small>Temperatura</small><strong id="fullTemp">21.9 °C</strong></div><div class="tile"><small>Humedad relativa</small><strong id="fullHum">56.8 %</strong></div><div class="tile"><small>MQ135 · reportado</small><strong id="fullGas">0.0*</strong></div></div>
+<div class="full-warning"><b>ATENCIÓN · DATOS SIMULADOS</b><p>Los cuatro lugares utilizan exactamente las mismas mediciones. Una estación real necesitará coordenadas verificadas y un equipo independiente.</p>
+<p>El SCD40 no mide PM₂.₅, PM₁₀ ni O₃. La lectura del MQ135 requiere calibración y no constituye un índice ambiental oficial.</p></div>
+<p id="sourceDetail" style="font-size:11px;color:#c9dfd8;line-height:1.5">Datos históricos compartidos con el dashboard principal.</p>
+<button id="reloadHistory" type="button" class="outline" style="width:100%;font-size:12px">↻ Recargar historial del navegador</button></aside>
+</main>
+<p class="full-footer">JEEKA · Jefatura Estratégica de Evaluación Ecológica y Kalidad del Aire · Red piloto demostrativa · Sonora</p>
+</div></body></html>

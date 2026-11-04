@@ -12,7 +12,7 @@ let siteId=D.sites.some(x=>x.id===params.get("site"))?params.get("site"):D.sites
 let stationId=/^[A-Z0-9_-]{2,32}$/.test(params.get("station")||"")?params.get("station"):D.stationId;
 let points=D.minuteRows.map(x=>({ts:D.timestamp+" "+x[0]+":00",co2:x[1],temp:x[2],hum:x[3],gas:x[4]}));
 let exactLast=D.defaultStats.last;
-let moment=Math.min(points.length-1,Math.max(0,Number(params.get("index"))||points.length-1));
+let moment=params.has("index")&&Number.isFinite(Number(params.get("index")))?Math.min(points.length-1,Math.max(0,Number(params.get("index")))):points.length-1;
 let map=null,feature=null,markers=[],broadcast=null;
 const fmt=(n,precision=0)=>Number(n).toLocaleString("es-MX",{minimumFractionDigits:precision,maximumFractionDigits:precision});
 const isoSafe=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
@@ -66,7 +66,7 @@ async function useStoredReadings(){
    const result=window.JeekaImport.summary(saved.readings);
    points=result.rows.map(x=>({ts:x.ts,co2:x.co2,temp:x.temp,hum:x.hum,gas:x.gas}));
    exactLast=result.stats.last;
-   moment=Number.isFinite(Number(params.get("index")))?Math.min(points.length-1,Math.max(0,Number(params.get("index")))):points.length-1;
+   moment=params.has("index")&&Number.isFinite(Number(params.get("index")))?Math.min(points.length-1,Math.max(0,Number(params.get("index")))):points.length-1;
    $("sourceType").textContent="Historial local de "+stationId+" · replicado en los 4 puntos";
    $("sourceDetail").textContent=fmt(saved.readings.length)+" registros almacenados · no hay transmisión en vivo";
    render();

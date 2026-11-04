@@ -14,3 +14,8 @@ No usar categorías de riesgo por CO₂ como AQI ni presentar esta copia como le
 ## Arquitectura
 
 Íconos, tags y tarjetas reaccionan al instante del histórico seleccionado. El único almacenamiento medido actual continúa en la ingesta manual y IndexedDB por station_id. Demo no alimenta base de datos; importador existente conserva su comportamiento.
+
+
+## v0.4 · Adaptación a aplicaciones cartográficas
+
+Se utiliza `jeeka-eagle-vector.svg` para mantener nitidez al escalar, y `jeeka-pin.svg` en los tres mapas: integrado, minimapa de pines pequeños y `mapa.html` de ventana independiente. Se redujo el ruido visual y se aumentó el contraste de texto y controles. El motor de importación permanece intacto. La cartografía demo sigue etiquetada SIMULADA.

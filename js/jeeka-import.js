@@ -1,4 +1,4 @@
-/* JEEKA · Importador v0.2 | Todo se procesa y guarda en el navegador. */
+/* JEEKA · Importador v0.2 | Ingesta idempotente, conserva datos en el navegador. */
 (function (root) {
   "use strict";
   var DB_NAME = "jeeka-tukawiru-v2", DB_VERSION = 1;
@@ -57,7 +57,9 @@
       var n=Date.parse(raw);if(!Number.isFinite(n))return null;
       var datepart=raw.slice(0,10),timepart=raw.slice(11,19);
       if(!validDate(datepart,timepart))return null;
-      return {utc:new Date(n).toISOString(),local:datepart+" "+timepart,original:iso};
+      var off=offset.match(/^([+-])(\d{2}):(\d{2})$/), delta=(off[1]==="-"?-1:1)*(Number(off[2])*60+Number(off[3]))*60000;
+      var local=new Date(n+delta).toISOString().slice(0,19).replace("T"," ");
+      return {utc:new Date(n).toISOString(),local:local,original:iso};
     }
     if(!validDate(String(date||"").trim(),String(time||"").trim()))return null;
     raw=original.replace(" ","T")+offset;
@@ -138,7 +140,7 @@
     try{
       var tx=db.transaction(["readings","stations","incidents","batches"],"readwrite");
       var rid=Date.now().toString(36)+"-"+Math.random().toString(36).slice(2,9);
-      prepared.newRows.forEach(function(r){tx.objectStore("readings").put(r);});
+      prepared.newRows.forEach(function(r){tx.objectStore("readings").add(r);});
       prepared.issues.forEach(function(r,i){tx.objectStore("incidents").put({id:rid+"|"+i,station:prepared.station,batch:rid,row:r.row,type:r.type,detail:r.detail});});
       tx.objectStore("stations").put({id:prepared.station,lastImported:new Date().toISOString(),timezone:prepared.offset,locationVerified:false});
       tx.objectStore("batches").put({id:rid,station:prepared.station,filename:prepared.filename,importedAt:new Date().toISOString(),total:prepared.total,accepted:prepared.newRows.length,duplicates:prepared.duplicate,conflicts:prepared.conflict,rejected:prepared.issues.length,warnings:prepared.warnings});

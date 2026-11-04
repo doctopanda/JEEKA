@@ -4,7 +4,22 @@
 
 > Vigilar el aire. Anticipar el riesgo.
 
-## Versión actual: 0.2 · Importación CSV/JSON persistente
+## JEEKA v0.3 · Identidad visual y red piloto (04/11/2026)
+
+La interfaz incorpora el águila original en miniatura y marcador, un encabezado de paisaje sonorense, nuevas tarjetas KPI y una red de **cuatro ubicaciones demostrativas** en Hermosillo:
+
+- CECOSABI (Proyecto Río Sonora)
+- UNISON (campus Hermosillo)
+- Metrocentro (sector Colosio)
+- Jardín Juárez (zona centro)
+
+**Importante:** No hay cuatro monitores reales. Los cuatro marcadores muestran exactamente el mismo histórico CSV, replicado únicamente en la interfaz. Las ubicaciones son referencias aproximadas y los valores no miden contaminación en esos lugares. Los datos demo no se escriben cuatro veces en la base IndexedDB. Tampoco se generan índices de calidad del aire.
+
+Los controles del mapa permiten seleccionar cada sitio, abrir una ficha con cuatro variables, enfocar el marcador y ajustar la vista a los cuatro puntos. Para reemplazarlos por estaciones reales se necesitará geolocalización verificada y series independientes.
+
+Identidad visual, miniaturas, marcador, tag y criterios: [Diseño visual de JEEKA](docs/DISENO_VISUAL.md).
+
+## Versión anterior: 0.2 · Importación CSV/JSON persistente
 
 **La webapp sigue siendo independiente de la red local del monitor.** Se incorporó el módulo `js/jeeka-import.js` y el centro de importación en `index.html`.
 

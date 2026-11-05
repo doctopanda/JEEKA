@@ -93,3 +93,10 @@ nav{background:#073039ee;border:1px solid #24646a;padding:12px 16px;border-radiu
 @media(max-width:1080px){.workspace,.lower{grid-template-columns:1fr}.map{height:470px}.hero-art{width:35%}}
 @media(max-width:750px){.wrap{padding:11px 11px 42px}.emblem{width:62px;height:62px}.brandname{font-size:25px}.brandsub{font-size:10px}.hero{padding:16px}.hero-copy{max-width:94%}.hero-art{width:47%;opacity:.18}.hero-note{text-align:left}.panel-head{flex-direction:column}.map-toolbar{width:100%}.map-toolbar .fullmap-link{flex:1}.map-toolbar .select{max-width:none;flex:1}.map{height:385px}.map-tag{left:19px;top:12px;font-size:10px;padding:7px 9px}.map-tag span{display:none}.mini-map-panel{right:20px;bottom:18px;width:190px}.mini-map-canvas{height:126px}.mini-map-caption{font-size:9px}.kpi .value{font-size:33px}.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:430px){.mini-map-panel{position:relative;right:auto;bottom:auto;width:auto;margin:8px 15px 0}.mini-map-canvas{height:145px}.map{height:310px}.map-tag{max-width:190px}.topnav{gap:2px}.topnav a{font-size:11px;padding:7px}.navside{justify-content:flex-start}.map-toolbar .outline{font-size:11px}.hero h1{font-size:29px}}
+
+/* Identidad JEEKA oficial: se reutiliza el águila original, no las reinterpretaciones previas. */
+.brand-eagle,.hero-eagle,.stationicon img{object-fit:contain!important}
+.jeeka-map-pin{height:40px!important;width:38px!important;background:#073b45!important;border:2px solid #FFEEB0!important;border-radius:50% 50% 48% 48%!important;display:flex;justify-content:center;align-items:center;position:relative}
+.jeeka-map-pin img{height:32px!important;width:32px!important;border-radius:50%!important;object-fit:cover!important;border:0!important}
+.jeeka-map-pin:after{content:"";position:absolute;bottom:-9px;left:11px;border-left:6px solid transparent;border-right:6px solid transparent;border-top:9px solid #FFEEB0}
+.jeeka-mini-marker img{object-fit:cover!important;border-radius:50%!important;border:1px solid #FFEEB0;background:#083a43}

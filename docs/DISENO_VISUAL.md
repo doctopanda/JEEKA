@@ -19,3 +19,8 @@ No usar categorías de riesgo por CO₂ como AQI ni presentar esta copia como le
 ## v0.4 · Adaptación a aplicaciones cartográficas
 
 Se utiliza `jeeka-eagle-vector.svg` para mantener nitidez al escalar, y `jeeka-pin.svg` en los tres mapas: integrado, minimapa de pines pequeños y `mapa.html` de ventana independiente. Se redujo el ruido visual y se aumentó el contraste de texto y controles. El motor de importación permanece intacto. La cartografía demo sigue etiquetada SIMULADA.
+
+
+## v0.5 · Identidad exacta y mapa de pantalla completa
+
+El águila del póster proporcionado por el proyecto (archivo `JEEKA_ Paleta Charizard para el aire(2).png`) es el emblema oficial. No se sustituye por una ilustración vectorial alternativa. El recorte rasterizado optimizado `assets/jeeka-original-emblem.webp` se usa en tamaño pequeño, sin ampliar sobre su resolución. El visor y sus mapas emplean el mismo recurso. La presentación cartográfica de `mapa.html` usa un lienzo de pantalla completa con sidebar plegable, sin barra superior que le quite espacio al mapa. Todas las medidas en cuatro sitios son COPIAS DEMOSTRATIVAS de una sola serie, no mediciones independientes.

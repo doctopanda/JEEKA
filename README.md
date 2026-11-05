@@ -1,5 +1,19 @@
 # 🦅 JEEKA · Motor TUKAWIRU
 
+## JEEKA v0.5 · Mapa tipo BALAM, pantalla completa, marca original
+
+**Mapa:** `mapa.html` se rediseñó como una aplicación cartográfica de toda la ventana (`100dvh`): el mapa ocupa el espacio libre disponible, sin tarjetas recortadas ni desplazamiento de la página. La información ocupa un **sidebar estrecho de 306 px** con desplazamiento interno y botón para plegarse a 76 px. En teléfonos el sidebar se oculta y se abre con el botón JEEKA, dejando ver el mapa completo.
+
+El mapa conserva los cuatro lugares **SIMULADOS**: CECOSABI, UNISON, Metrocentro y Jardín Juárez. Muestran exactamente el mismo conjunto de datos, con marcadores reducidos y etiqueta solo para la ubicación seleccionada. La selección de un sitio, la variable y el momento del histórico siguen funcionando; el histórico importado en el navegador sigue disponible. No hay datos de sensores instalados en estos lugares.
+
+**Identidad visual sin reinterpretaciones:** se restableció el águila original aportada en la imagen `JEEKA_ Paleta Charizard para el aire(2).png`. Se guardó su recorte optimizado en `assets/jeeka-original-emblem.webp` (160×160 píxeles), usado para la marca y los pines tanto en el dashboard como en los dos mapas. Conserva los colores #FAAA6D, #419EAE, #F2684A, #FFEEB0, #FCC499. Los SVG redibujados de versiones anteriores quedan en el repositorio como historial, pero no como identidad de marca activa.
+
+**Archivos:** `mapa.html`, `css/jeeka-map-v05.css`, `js/jeeka-fullmap.js`, `assets/jeeka-original-emblem.webp`. Importador CSV/JSON `js/jeeka-import.js` sin cambios.
+
+**Verificación visual sugerida:** Ctrl+F5, confirmar que el mapa ocupe todo el alto y ancho disponible, plegar sidebar, seleccionar cada marcador y cambiar la hora. En móvil, probar el botón JEEKA para mostrar el panel y volver al mapa.
+
+
+
 ## JEEKA v0.4 · Mejora visual y cartografía dual
 
 Se incorporó un diseño de mayor contraste y legibilidad sobre la identidad JEEKA Charizard, y se sustituyeron los pequeños gráficos rasterizados por recursos vectoriales escalables SVG. Los originales permanecen en el repositorio como material de referencia.

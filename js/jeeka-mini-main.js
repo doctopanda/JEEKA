@@ -18,7 +18,7 @@ function updateLink(){
 }
 function miniIcon(active){
  return L.divIcon({className:"jeeka-mini-marker"+(active?" selected":""),iconSize:[25,30],iconAnchor:[12,27],
- html:'<img src="./assets/jeeka-pin.svg" alt="" width="18" height="25">'});
+ html:'<img src="./assets/jeeka-original-emblem.webp" alt="" width="18" height="25">'});
 }
 function showMini(show){
  const panel=$("miniMapPanel"),btn=$("miniMapToggle");

@@ -1,118 +1,167 @@
-/* JEEKA | mapa independiente v0.4.
-   Vista demostrativa; JAMÁS atribuye las lecturas a sensores locales. */
+/* JEEKA 0.5 · Mapa abierto en pantalla completa + sidebar plegable.
+   Identidad basada en la imagen original aportada. Todos los sitios son SIMULADOS.
+   El CSV/IndexedDB sigue siendo una única serie, nunca cuatro fuentes independientes. */
 (function(){
 "use strict";
-const D=window.JEEKA_DEMO;
-if(!D){document.body.insertAdjacentHTML("afterbegin",'<p role="alert">No se encontraron los datos del demo.</p>');return;}
-const $=id=>document.getElementById(id);
+const D=window.JEEKA_DEMO, $=id=>document.getElementById(id);
+if(!D){window.addEventListener("DOMContentLoaded",()=>document.body.insertAdjacentHTML("afterbegin",'<p role="alert">Falta el catálogo JEEKA.</p>'));return;}
 const params=new URLSearchParams(location.search);
-const metrics={co2:{name:"CO₂",unit:"ppm",digits:0},temp:{name:"Temperatura",unit:"°C",digits:1},hum:{name:"Humedad",unit:"%",digits:1},gas:{name:"Señal MQ135",unit:"ppm reportados*",digits:3}};
-let activeMetric=metrics[params.get("metric")]?params.get("metric"):"co2";
-let siteId=D.sites.some(x=>x.id===params.get("site"))?params.get("site"):D.sites[0].id;
+const METRIC={
+ co2:{name:"CO₂ · SCD40",unit:"ppm",digits:0},
+ temp:{name:"Temperatura",unit:"°C",digits:1},
+ hum:{name:"Humedad relativa",unit:"%",digits:1},
+ gas:{name:"Señal MQ135",unit:"ppm reportados*",digits:3}
+};
+let metric=METRIC[params.get("metric")]?params.get("metric"):"co2";
+let siteId=D.sites.some(s=>s.id===params.get("site"))?params.get("site"):D.sites[0].id;
 let stationId=/^[A-Z0-9_-]{2,32}$/.test(params.get("station")||"")?params.get("station"):D.stationId;
-let points=D.minuteRows.map(x=>({ts:D.timestamp+" "+x[0]+":00",co2:x[1],temp:x[2],hum:x[3],gas:x[4]}));
-let exactLast=D.defaultStats.last;
-let moment=params.has("index")&&Number.isFinite(Number(params.get("index")))?Math.min(points.length-1,Math.max(0,Number(params.get("index")))):points.length-1;
-let map=null,feature=null,markers=[],broadcast=null;
-const fmt=(n,precision=0)=>Number(n).toLocaleString("es-MX",{minimumFractionDigits:precision,maximumFractionDigits:precision});
-const isoSafe=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
-const current=()=>moment===points.length-1&&exactLast?{...points[moment],...exactLast}:points[moment];
-const selected=()=>D.sites.find(x=>x.id===siteId)||D.sites[0];
-const icon=site=>L.divIcon({className:"jeeka-leaflet-icon",iconSize:[46,68],iconAnchor:[23,59],popupAnchor:[0,-56],html:'<div class="jeeka-map-pin'+(site.id===siteId?' selected':'')+'"><img src="./assets/jeeka-pin.svg" alt="" /></div><div class="map-bubble">'+isoSafe(site.name)+'<small>SIMULADO</small></div>'});
-function popup(site){
- const r=current(),m=metrics[activeMetric];
- return '<div class="jeeka-popup"><div class="pop-top"><img src="./assets/jeeka-eagle-vector.svg" alt="" width="43" height="43"><div><b>'+isoSafe(site.name)+'</b><span>UBICACIÓN DEMOSTRATIVA</span></div></div>'+
- '<div class="pop-read"><strong>'+fmt(r[activeMetric],m.digits)+' '+m.unit+'</strong><span>'+m.name+'</span></div>'+
- '<div class="pop-cols">CO₂ '+fmt(r.co2)+' ppm · '+fmt(r.temp,1)+' °C<br>Humedad '+fmt(r.hum,1)+' % · MQ135 '+fmt(r.gas,3)+'*</div>'+
- '<div class="pop-warning">DATOS SIMULADOS: la misma serie de un monitor, replicada en cuatro sitios.</div>'+
- '<small>'+isoSafe(site.location)+'<br>'+isoSafe(site.locNote||"Punto aproximado")+'</small></div>';
+let points=D.minuteRows.map(r=>({ts:D.timestamp+" "+r[0]+":00",co2:r[1],temp:r[2],hum:r[3],gas:r[4]}));
+let lastReading=D.defaultStats.last;
+let index=params.has("index")&&Number.isFinite(+params.get("index"))?
+ Math.min(points.length-1,Math.max(0,Math.floor(+params.get("index")))):points.length-1;
+let map,group,markers=[],channel;
+const norm=(num,d=0)=>Number(num).toLocaleString("es-MX",{minimumFractionDigits:d,maximumFractionDigits:d});
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const selected=()=>D.sites.find(s=>s.id===siteId)||D.sites[0];
+const current=()=>index===points.length-1&&lastReading?{...points[index],...lastReading}:points[index];
+function pin(site){
+ const on=site.id===siteId;
+ const label=on?'<div class="atlas-pin-label">'+esc(site.name)+'<small>SIMULADO</small></div>':'';
+ return L.divIcon({className:"atlas-pin-shell",iconSize:[34,43],iconAnchor:[17,36],popupAnchor:[0,-35],
+ html:'<div class="atlas-pin'+(on?" selected":"")+'"><img src="./assets/jeeka-original-emblem.webp" alt=""></div>'+label});
 }
-function render(){
- const s=selected(),r=current(),m=metrics[activeMetric];
- $("fullMetric").value=activeMetric;
- $("fullTitle").textContent=s.name;
- $("siteType").textContent=s.kind+" · SIMULADO";
- $("siteAddress").textContent=s.location+" · "+(s.locNote||"referencia aproximada");
- $("fullValue").textContent=fmt(r[activeMetric],m.digits);
+function popup(site){
+ const r=current(),m=METRIC[metric];
+ return '<div class="atlas-marker-popup"><strong>'+esc(site.name)+'</strong><br><span class="status">SIMULADO</span>'+
+ '<div class="details"><b>'+esc(m.name)+': '+norm(r[metric],m.digits)+' '+esc(m.unit)+'</b>'+
+ '<br>CO₂ '+norm(r.co2)+' ppm · '+norm(r.temp,1)+' °C<br>Humedad '+norm(r.hum,1)+' % · MQ135 '+norm(r.gas,3)+'</div>'+
+ '<small>'+esc(site.location)+'<br><b>Advertencia:</b> copia del mismo histórico en los cuatro sitios. No hay sensor aquí.</small></div>';
+}
+function redrawMarkers(){
+ markers.forEach(entry=>{
+  entry.marker.setIcon(pin(entry.site));
+  entry.marker.setZIndexOffset(entry.site.id===siteId?1000:0);
+  if(entry.marker.getPopup())entry.marker.setPopupContent(popup(entry.site));
+  else entry.marker.bindPopup(popup(entry.site),{minWidth:205,maxWidth:280});
+ });
+}
+function refresh(){
+ if(!points.length)return;
+ index=Math.max(0,Math.min(index,points.length-1));
+ const site=selected(),r=current(),m=METRIC[metric];
+ $("fullMetric").value=metric;
+ $("fullTitle").textContent=site.name;
+ $("siteType").textContent=site.kind+" · DEMO";
+ $("siteAddress").textContent=site.location+" · "+(site.locNote||"punto aproximado");
+ $("fullValue").textContent=norm(r[metric],m.digits);
  $("fullUnit").textContent=m.unit;
  $("metricName").textContent=m.name;
- $("fullCo2").textContent=fmt(r.co2)+" ppm";
- $("fullTemp").textContent=fmt(r.temp,1)+" °C";
- $("fullHum").textContent=fmt(r.hum,1)+" %";
- $("fullGas").textContent=fmt(r.gas,3)+"*";
+ $("fullCo2").textContent=norm(r.co2)+" ppm";
+ $("fullTemp").textContent=norm(r.temp,1)+" °C";
+ $("fullHum").textContent=norm(r.hum,1)+" %";
+ $("fullGas").textContent=norm(r.gas,3)+"*";
  $("fullTimestamp").textContent=r.ts;
- $("fullSlider").max=Math.max(0,points.length-1);$("fullSlider").value=moment;
+ $("fullSlider").max=points.length-1;
+ $("fullSlider").value=index;
  $("fullRangeStart").textContent=points[0].ts.slice(5,16);
  $("fullRangeEnd").textContent=points[points.length-1].ts.slice(5,16);
- $("fullCount").textContent=points.length+" minutos de la serie seleccionada";
- document.querySelectorAll("[data-site]").forEach(b=>{const on=b.dataset.site===siteId;b.classList.toggle("active",on);b.setAttribute("aria-pressed",on?"true":"false");});
- markers.forEach(({site,marker})=>{
-   marker.setIcon(icon(site));
-   if(marker.getPopup())marker.setPopupContent(popup(site));else marker.bindPopup(popup(site),{maxWidth:320,minWidth:230});
+ $("fullCount").textContent=points.length+" puntos por minuto; serie compartida";
+ document.querySelectorAll("[data-site]").forEach(b=>{
+  const isActive=b.dataset.site===siteId;
+  b.classList.toggle("active",isActive);
+  b.setAttribute("aria-pressed",isActive?"true":"false");
  });
+ redrawMarkers();
 }
-function choose(id,pop=true,center=true){
+function choose(id,pan=true,openPopup=true){
  if(!D.sites.some(s=>s.id===id))return;
- siteId=id;render();
- const entry=markers.find(x=>x.site.id===id);
- if(entry&&map){if(center)map.panTo(entry.marker.getLatLng());if(pop)entry.marker.openPopup();}
+ siteId=id;refresh();
+ const item=markers.find(x=>x.site.id===id);
+ if(map&&item){
+  if(pan)map.panTo(item.marker.getLatLng(),{animate:true});
+  if(openPopup)item.marker.openPopup();
+ }
 }
-function showAll(){if(map&&feature)map.fitBounds(feature.getBounds().pad(.29),{maxZoom:13,animate:true});}
-async function useStoredReadings(){
+function fitAll(){
+ if(map&&group)map.fitBounds(group.getBounds().pad(.48),{maxZoom:13,animate:true});
+}
+function setSidebar(open){
+ const shell=$("atlasShell");
+ shell.classList.toggle("collapsed",!open);
+ $("sideToggle").textContent=open?"‹":"›";
+ $("sideToggle").setAttribute("aria-expanded",open?"true":"false");
+ $("sideToggle").setAttribute("aria-label",open?"Plegar sidebar":"Desplegar sidebar");
+ if(map){
+  setTimeout(()=>map.invalidateSize({pan:false}),250);
+  setTimeout(()=>map.invalidateSize({pan:false}),360);
+ }
+}
+async function loadLocal(){
  if(!window.JeekaImport)return;
  try{
-  const saved=await window.JeekaImport.load(stationId);
-  if(saved.readings.length){
-   const result=window.JeekaImport.summary(saved.readings);
-   points=result.rows.map(x=>({ts:x.ts,co2:x.co2,temp:x.temp,hum:x.hum,gas:x.gas}));
-   exactLast=result.stats.last;
-   moment=params.has("index")&&Number.isFinite(Number(params.get("index")))?Math.min(points.length-1,Math.max(0,Number(params.get("index")))):points.length-1;
-   $("sourceType").textContent="Historial local de "+stationId+" · replicado en los 4 puntos";
-   $("sourceDetail").textContent=fmt(saved.readings.length)+" registros almacenados · no hay transmisión en vivo";
-   render();
+  const history=await window.JeekaImport.load(stationId);
+  if(!history.readings.length){
+   $("sourceType").textContent="Histórico incluido · archivo CSV 04/11/2026";
+   $("sourceDetail").textContent="Se está usando el demo integrado; ningún sensor local está conectado.";
+   return;
   }
- }catch(e){$("sourceDetail").textContent="No fue posible consultar IndexedDB: "+e.message;}
+  const summary=window.JeekaImport.summary(history.readings);
+  points=summary.rows.map(x=>({ts:x.ts,co2:x.co2,temp:x.temp,hum:x.hum,gas:x.gas}));
+  lastReading=summary.stats.last;
+  index=params.has("index")&&Number.isFinite(+params.get("index"))?
+   Math.min(points.length-1,Math.max(0,Math.floor(+params.get("index")))):points.length-1;
+  $("sourceType").textContent="Histórico local de "+stationId+" · mismas lecturas en cuatro sitios";
+  $("sourceDetail").textContent=norm(history.readings.length)+" registros almacenados solo en este navegador.";
+  refresh();
+ }catch(err){$("sourceDetail").textContent="No se pudo abrir IndexedDB: "+err.message;}
 }
-function start(){
- $("fullMetric").addEventListener("change",e=>{activeMetric=e.target.value;render();});
- $("fullSlider").addEventListener("input",e=>{moment=Number(e.target.value);render();});
- $("fitAll").addEventListener("click",showAll);
+function boot(){
+ $("fullMetric").addEventListener("change",e=>{metric=e.target.value;refresh();});
+ $("fullSlider").addEventListener("input",e=>{index=+e.target.value;refresh();});
+ $("fitAll").addEventListener("click",fitAll);
+ $("sideToggle").addEventListener("click",()=>setSidebar($("atlasShell").classList.contains("collapsed")));
+ $("sideRestore").addEventListener("click",()=>setSidebar(true));
  $("fullScreen").addEventListener("click",()=>{
-  const node=$("mapFrame");
+  const frame=$("mapFrame");
   if(document.fullscreenElement)document.exitFullscreen?.();
-  else node.requestFullscreen?.();
+  else frame.requestFullscreen?.();
  });
+ $("reloadHistory").addEventListener("click",loadLocal);
  document.querySelectorAll("[data-site]").forEach(btn=>btn.addEventListener("click",()=>choose(btn.dataset.site)));
- $("reloadHistory").addEventListener("click",()=>useStoredReadings());
- if(typeof L!=="undefined"){
-  map=L.map("fullMap",{zoomControl:false,preferCanvas:true}).setView([29.076,-110.973],12);
+ if(typeof L==="undefined"){
+  $("fullMap").innerHTML='<div class="map-unavailable">No se pudo cargar Leaflet. Verifica la conexión para mostrar los mapas OpenStreetMap.</div>';
+ }else{
+  map=L.map("fullMap",{zoomControl:false,preferCanvas:true,scrollWheelZoom:true}).setView([29.076,-110.975],12);
   L.control.zoom({position:"bottomright"}).addTo(map);
-  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19,attribution:"© OpenStreetMap contributors"}).addTo(map);
-  feature=L.featureGroup().addTo(map);
+  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{
+   maxZoom:19,attribution:"© OpenStreetMap contributors"
+  }).addTo(map);
+  group=L.featureGroup().addTo(map);
   D.sites.forEach(site=>{
-   const marker=L.marker([site.lat,site.lng],{icon:icon(site),title:site.name+" | DEMO",keyboard:true}).addTo(feature);
-   marker.bindPopup(popup(site),{maxWidth:320,minWidth:230});
+   const marker=L.marker([site.lat,site.lng],{icon:pin(site),title:site.name+" · DEMO",keyboard:true}).addTo(group);
+   marker.bindPopup(popup(site),{minWidth:205,maxWidth:280});
+   marker.bindTooltip(site.name+" · DEMO",{direction:"top",offset:[0,-28],opacity:.9});
    marker.on("click",()=>choose(site.id,false,false));
    markers.push({site,marker});
   });
-  showAll();
- }else {$("fullMap").innerHTML='<div class="map-unavailable">No se pudo cargar Leaflet. La lectura y los botones de ubicación siguen disponibles.</div>';}
- render();
- window.addEventListener("resize",()=>{if(map)setTimeout(()=>map.invalidateSize(),90);});
- document.addEventListener("fullscreenchange",()=>{if(map)setTimeout(()=>map.invalidateSize(),140);});
- useStoredReadings();
+  fitAll();
+ }
+ if(window.matchMedia("(max-width:840px)").matches)setSidebar(false);
+ refresh();
+ window.addEventListener("resize",()=>{if(map)setTimeout(()=>map.invalidateSize({pan:false}),100);});
+ document.addEventListener("fullscreenchange",()=>{if(map)setTimeout(()=>map.invalidateSize({pan:false}),120);});
+ loadLocal();
  if("BroadcastChannel" in window){
-  broadcast=new BroadcastChannel("jeeka-map-sync-v1");
-  broadcast.onmessage=e=>{
-   const data=e.data;
-   if(!data||data.type!=="dashboard-state")return;
-   if(data.station&&data.station!==stationId){stationId=data.station;useStoredReadings();}
-   if(metrics[data.metric])activeMetric=data.metric;
-   if(D.sites.some(x=>x.id===data.site))siteId=data.site;
-   if(Number.isInteger(data.index))moment=Math.max(0,Math.min(points.length-1,data.index));
-   render();
+  channel=new BroadcastChannel("jeeka-map-sync-v1");
+  channel.onmessage=e=>{
+   const data=e.data;if(!data||data.type!=="dashboard-state")return;
+   if(data.station&&data.station!==stationId){stationId=data.station;loadLocal();}
+   if(METRIC[data.metric])metric=data.metric;
+   if(D.sites.some(s=>s.id===data.site))siteId=data.site;
+   if(Number.isInteger(data.index))index=Math.min(points.length-1,Math.max(0,data.index));
+   refresh();
   };
  }
 }
-window.addEventListener("load",start);
+window.addEventListener("load",boot);
 })();
